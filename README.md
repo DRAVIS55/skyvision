@@ -2,7 +2,7 @@
 
 A lightweight weather dashboard that pulls real-time forecasts from **Open-Meteo** and generates natural-language weather insights using **Google Gemini 2.5 Flash**. Built as a take-home assessment for the Weather-AI engineering team.
 
-**Live demo →** `https://your-deployment-url.com` *(replace with your deployment link)*
+**Live demo →** `https://skyvision-z0hy.onrender.com/` *(replace with your deployment link)*
 
 ---
 
@@ -47,7 +47,7 @@ The server normalises Open-Meteo's raw response into a clean shape (`current`, `
 ### 1 — Clone the repo
 
 ```bash
-git clone https://github.com/your-username/weather-ai-dashboard.git
+git clone https://github.com/DRAVIS55/skyvision.git
 cd weather-ai-dashboard
 ```
 
