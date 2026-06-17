@@ -17,7 +17,7 @@ const genAI = GEMINI_API_KEY
     : null;
 
 if (!GEMINI_API_KEY) {
-    console.warn('⚠️ GEMINI_API_KEY not set — AI insights will be disabled.');
+    console.warn(' GEMINI_API_KEY not set — AI insights will be disabled.');
 }
 
 app.use(cors());
@@ -235,7 +235,7 @@ app.get('/api/health', (_req, res) => res.json({
 }));
 
 app.listen(PORT, () => {
-  console.log(`✅  Weather-AI server → http://localhost:${PORT}`);
+  console.log(`  Weather-AI server → http://localhost:${PORT}`);
   console.log(`   Weather : Open-Meteo (no key required)`);
   console.log(
     `   AI      : ${
