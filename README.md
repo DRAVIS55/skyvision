@@ -2,7 +2,7 @@
 
 A lightweight weather dashboard that pulls real-time forecasts from **Open-Meteo** and generates natural-language weather insights using **Google Gemini 2.5 Flash**. Built as a take-home assessment for the Weather-AI engineering team.
 
-**Live demo →** `https://your-deployment-url.com` *(replace with your deployment link)*
+**Live demo →** [skyvision-z0hy.onrender.com](https://skyvision-z0hy.onrender.com/)
 
 ---
 
@@ -47,8 +47,8 @@ The server normalises Open-Meteo's raw response into a clean shape (`current`, `
 ### 1 — Clone the repo
 
 ```bash
-git clone https://github.com/your-username/weather-ai-dashboard.git
-cd weather-ai-dashboard
+git clone https://github.com/DRAVIS55/skyvision.git
+cd skyvision
 ```
 
 ### 2 — Install dependencies
@@ -205,10 +205,13 @@ docker run -p 3000:3000 -e GEMINI_API_KEY=AIzaSy... weather-ai
 ## 📁 Project structure
 
 ```
-weather-ai-dashboard/
+skyvision/
 ├── public/
 │   └── index.html        # Single-page frontend (vanilla JS + CSS)
 ├── server.js             # Express server — Open-Meteo + Gemini integration
+├── render.yaml           # Render deployment config
+├── railway.toml          # Railway deployment config
+├── Procfile              # Heroku / Procfile-aware host config
 ├── package.json
 ├── .env.example          # Environment variable template
 └── README.md
