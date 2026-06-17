@@ -2,7 +2,7 @@
 
 A lightweight weather dashboard that pulls real-time forecasts from **Open-Meteo** and generates natural-language weather insights using **Google Gemini 2.5 Flash**. Built as a take-home assessment for the Weather-AI engineering team.
 
-**Live demo →** [skyvision-z0hy.onrender.com](https://skyvision-z0hy.onrender.com/)
+**Live demo →** [weatherai-bulletin.onrender.com](https://weatherai-bulletin.onrender.com/)
 
 ---
 
