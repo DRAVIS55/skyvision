@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: weather-ai-dashboard
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false   # set this manually in the Render dashboard

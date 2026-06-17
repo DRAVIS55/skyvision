@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather-AI · Real-time forecasts with AI insights</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Editorial Tokens ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-main:      #fcfbfa; /* Warm paper ivory */
+      --bg-card:      #ffffff;
+      --border-color: #e5e5e0; /* Tactile muted paper seam */
+      --text-main:    #1c1c1e; /* Deep charcoal ink */
+      --text-muted:   #6b6a65; /* Muted stone grey */
+      --text-soft:    #94928c;
+      --accent:       #4a6b5d; /* Sage / Olive accent */
+      --accent-light: #f1f4f2;
+      --error-bg:     #fdf2f2;
+      --error-border: #f8b4b4;
+      --error-text:   #9b1c1c;
+      
+      --sans: 'Inter', system-ui, sans-serif;
+      --serif: 'Playfair Display', Georgia, serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    html { font-size: 15px; }
+
+    body {
+      font-family: var(--sans);
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout Framework ────────────────────────────────────────── */
+    .page {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 60px 24px 100px;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      border-bottom: 2px solid var(--text-main);
+      padding-bottom: 16px;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .logo-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+    .logo-text {
+      font-family: var(--serif);
+      font-size: 1.6rem; 
+      font-weight: 700; 
+      letter-spacing: -.01em;
+    }
+    .logo-text span { 
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-left: 6px;
+      color: var(--accent);
+    }
+
+    .header-badge {
+      font-size: .8rem;
+      color: var(--text-muted);
+      font-style: italic;
+      font-family: var(--serif);
+    }
+
+    /* ── Search Block ───────────────────────────────────────────── */
+    .search-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 24px;
+      margin-bottom: 32px;
+    }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto auto;
+      gap: 16px;
+      align-items: end;
+    }
+
+    .field label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 0px; /* Flat human architecture design */
+      padding: 11px 14px;
+      font-family: var(--sans);
+      font-size: .9rem;
+      color: var(--text-main);
+      transition: border-color .15s ease;
+      outline: none;
+    }
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--text-main);
+    }
+    .field select {
+      appearance: auto;
+    }
+
+    /* ── Human Flat Action Buttons ──────────────────────────────── */
+    .btn {
+      padding: 12px 24px;
+      border-radius: 0px;
+      font-family: var(--sans);
+      font-size: .88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+      white-space: nowrap;
+    }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--text-main);
+      color: var(--bg-main);
+      border: 1px solid var(--text-main);
+    }
+    .btn-primary:hover:not(:disabled) { 
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+    .btn-ghost:hover:not(:disabled) { 
+      border-color: var(--text-main);
+      background: var(--bg-main);
+    }
+
+    /* ── Usage Row Indicator ────────────────────────────────────── */
+    .usage-strip {
+      display: flex; align-items: center; gap: 14px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border-color);
+      flex-wrap: wrap;
+    }
+    .usage-label {
+      font-family: var(--mono); font-size: .75rem; color: var(--text-muted);
+    }
+    .usage-bar-wrap {
+      flex: 1; min-width: 140px;
+      height: 6px;
+      background: var(--border-color);
+    }
+    .usage-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width .4s ease;
+    }
+    .usage-text {
+      font-family: var(--mono); font-size: .75rem; color: var(--text-main);
+    }
+
+    /* ── Status Container Frames ────────────────────────────────── */
+    .state-box {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      border: 1px dashed var(--border-color);
+      background: #fff;
+    }
+    .state-icon { font-size: 2.5rem; margin-bottom: 14px; }
+    .state-title { font-family: var(--serif); font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; color: var(--text-main); }
+    .state-sub { font-size: .9rem; line-height: 1.6; max-width: 420px; margin: 0 auto; }
+
+    .spinner-ring {
+      width: 32px; height: 32px;
+      border: 2px solid var(--border-color);
+      border-top-color: var(--text-main);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Data Core Display Elements ────────────────────────────── */
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 24px;
+    }
+
+    .card-label {
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 6px;
+    }
+
+    /* Temp Layout blocks */
+    .temp-hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .temp-big {
+      font-family: var(--serif);
+      font-size: 4.5rem;
+      font-weight: 600;
+      letter-spacing: -.02em;
+      line-height: 1;
+      color: var(--text-main);
+    }
+    .temp-unit { font-size: 2rem; font-family: var(--sans); font-weight: 400; color: var(--text-soft); }
+    .weather-emoji { font-size: 3.5rem; line-height: 1; }
+    
+    .condition-text {
+      font-family: var(--serif);
+      font-size: 1.2rem;
+      font-style: italic;
+      color: var(--text-main);
+      margin-top: 12px;
+    }
+    .feels-like {
+      font-size: .85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Standardized Ledger Grids */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border-color);
+      margin-top: 24px;
+      border: 1px solid var(--border-color);
+    }
+    .stat {
+      background: var(--bg-card);
+      padding: 12px 14px;
+    }
+    .stat-label {
+      font-size: .7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      margin-bottom: 4px;
+    }
+    .stat-value {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    /* Meta text */
+    .location-name {
+      font-family: var(--serif);
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .location-meta {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── Forecast Ledger Structure ──────────────────────────────── */
+    .forecast-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .forecast-scroll {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+      gap: 0px;
+      border: 1px solid var(--border-color);
+    }
+    .forecast-day {
+      background: var(--bg-card);
+      border-right: 1px solid var(--border-color);
+      padding: 16px 12px;
+      text-align: center;
+    }
+    .forecast-scroll .forecast-day:last-child {
+      border-right: none;
+    }
+    .fd-name { font-size: .75rem; font-weight: 600; color: var(--text-main); text-transform: uppercase; }
+    .fd-date { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
+    .fd-icon { font-size: 1.6rem; margin: 12px 0; line-height: 1; }
+    .fd-high { font-size: .95rem; font-weight: 600; color: var(--text-main); }
+    .fd-low  { font-size: .85rem; color: var(--text-muted); margin-top: 1px; }
+    .fd-cond { font-size: .7rem; color: var(--text-muted); margin-top: 8px; line-height: 1.3; min-height: 24px; }
+    .fd-rain { font-size: .7rem; color: var(--accent); margin-top: 6px; font-weight: 500; }
+
+    /* ── Editorial Style AI Analysis Summary Block ──────────────── */
+    .ai-card {
+      background: var(--accent-light);
+      border-left: 4px solid var(--accent);
+      border-top: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .ai-header {
+      margin-bottom: 12px;
+    }
+    .ai-badge {
+      font-family: var(--serif);
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--accent);
+      font-style: italic;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ai-dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+    .ai-summary {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      line-height: 1.65;
+      color: var(--text-main);
+    }
+
+    /* ── Hourly Matrix Line Bars ────────────────────────────────── */
+    .hourly-chart {
+      display: flex; align-items: flex-end; gap: 12px;
+      height: 80px;
+      margin-top: 16px;
+      padding: 0 4px;
+    }
+    .hour-bar-wrap {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+    }
+    .hour-temp { font-size: .7rem; color: var(--text-main); font-weight: 500; }
+    .hour-bar {
+      width: 100%;
+      background: var(--border-color);
+      min-height: 4px;
+      transition: height .4s ease;
+    }
+    .hour-bar-wrap:hover .hour-bar {
+      background: var(--accent);
+    }
+    .hour-label { font-size: .7rem; color: var(--text-muted); font-family: var(--mono); }
+
+    /* ── Structural Responsiveness ─────────────────────────────── */
+    @media (max-width: 768px) {
+      .search-row { grid-template-columns: 1fr 1fr; }
+      .hero-grid  { grid-template-columns: 1fr; }
+      .forecast-scroll { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+      .forecast-day { border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); }
+    }
+    @media (max-width: 480px) {
+      .search-row { grid-template-columns: 1fr; }
+      .page { padding: 30px 16px 60px; }
+      .temp-big { font-size: 3.5rem; }
+    }
+
+    /* ── Alerts ─────────────────────────────────────────────────── */
+    .alert {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      padding: 14px 18px;
+      font-size: .88rem;
+      color: var(--error-text);
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page">
+    <header>
+      <div class="logo">
+        <div class="logo-icon">🌤</div>
+        <div class="logo-text">Weather<span>AI Bulletin</span></div>
+      </div>
+      <div class="header-badge" id="plan-badge">Powered by Open-Meteo + Claude AI</div>
+    </header>
+
+    <div class="search-card">
+      <div class="search-row">
+        <div class="field">
+          <label>Latitude</label>
+          <input id="lat" type="text" placeholder="-1.2921" value="-1.2921" />
+        </div>
+        <div class="field">
+          <label>Longitude</label>
+          <input id="lon" type="text" placeholder="36.8219" value="36.8219" />
+        </div>
+        <div class="field">
+          <label>Forecast Span</label>
+          <select id="days">
+            <option value="3">3 days</option>
+            <option value="5" selected>5 days</option>
+            <option value="7">7 days</option>
+          </select>
+        </div>
+        <button class="btn btn-ghost" onclick="detectLocation()" id="geoBtn" title="Use my location">Detect Location</button>
+        <button class="btn btn-primary" onclick="loadWeather()" id="searchBtn">Generate Report</button>
+      </div>
+
+      <div class="usage-strip" id="usage-strip" style="display:none">
+        <span class="usage-label" id="usage-plan"></span>
+        <span class="usage-text" id="usage-text"></span>
+      </div>
+    </div>
+
+    <div id="alert-box"></div>
+    <div id="content">
+      <div class="state-box">
+        <div class="state-icon">🌍</div>
+        <div class="state-title">Awaiting Coordinates</div>
+        <div class="state-sub">Enter historical or active coordinates above to populate meteorological arrays and editorial analysis summaries.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function checkHealth() {
+      try {
+        const res  = await fetch('/api/health');
+        const data = await res.json();
+        const badge = document.getElementById('plan-badge');
+        if (data.ai_ready) {
+          badge.textContent = '✦ Intelligent synopses active';
+          badge.style.color = 'var(--accent)';
+        } else {
+          badge.textContent = 'Meteorological Array · Open-Meteo';
+        }
+      } catch(_) {}
+    }
+
+    function icon(condition) {
+      if (!condition) return '🌤️';
+      const c = condition.toLowerCase();
+      if (c.includes('thunder') || c.includes('storm')) return '⛈️';
+      if (c.includes('heavy rain') || c.includes('pour'))  return '🌧️';
+      if (c.includes('rain') || c.includes('drizzle'))     return '🌦️';
+      if (c.includes('snow') || c.includes('sleet'))       return '❄️';
+      if (c.includes('fog') || c.includes('mist'))         return '🌫️';
+      if (c.includes('overcast') || c.includes('cloud'))   return '☁️';
+      if (c.includes('partly') || c.includes('partial'))   return '⛅';
+      if (c.includes('sun') || c.includes('clear'))        return '☀️';
+      return '🌤️';
+    }
+
+    function fmtDay(dateStr) {
+      const d = new Date(dateStr);
+      return {
+        name: d.toLocaleDateString('en-US', { weekday: 'short' }),
+        date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      };
+    }
+
+    function setLoading(on) {
+      document.getElementById('searchBtn').disabled = on;
+      document.getElementById('geoBtn').disabled    = on;
+      if (on) {
+        document.getElementById('content').innerHTML = `
+          <div class="state-box">
+            <div class="spinner-ring"></div>
+            <div class="state-title">Parsing Meteorological Tables…</div>
+            <div class="state-sub">Compiling dynamic tracking data models and editorial notes...</div>
+          </div>`;
+      }
+    }
+
+    function showAlert(msg) {
+      document.getElementById('alert-box').innerHTML = `<div class="alert">Notice: ${msg}</div>`;
+    }
+    function clearAlert() { document.getElementById('alert-box').innerHTML = ''; }
+
+    async function loadWeather() {
+      const lat  = document.getElementById('lat').value.trim();
+      const lon  = document.getElementById('lon').value.trim();
+      const days = document.getElementById('days').value;
+
+      if (!lat || !lon) { showAlert('Coordinates parameters require complete values.'); return; }
+      clearAlert();
+      setLoading(true);
+
+      try {
+        const res  = await fetch(`/api/weather?lat=${lat}&lon=${lon}&days=${days}&ai=true`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+        renderWeather(data);
+      } catch (err) {
+        setLoading(false);
+        showAlert(`Error parsing record: ${err.message}`);
+        document.getElementById('content').innerHTML = `
+          <div class="state-box">
+            <div class="state-icon">✕</div>
+            <div class="state-title">Data Fetch Disruption</div>
+            <div class="state-sub">${err.message}</div>
+          </div>`;
+      }
+    }
+
+    function detectLocation() {
+      if (!navigator.geolocation) { showAlert('Device structural location services are unavailable.'); return; }
+      setLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          document.getElementById('lat').value = pos.coords.latitude.toFixed(4);
+          document.getElementById('lon').value = pos.coords.longitude.toFixed(4);
+          loadWeather();
+        },
+        () => { setLoading(false); showAlert('Location authorization denied. Enter coordinate figures manually.'); }
+      );
+    }
+
+    function renderWeather(data) {
+      const cur    = data.current  || {};
+      const fc     = data.forecast || [];
+      const hourly = data.hourly   || [];
+      const ai     = data.ai_summary || '';
+      const tz     = data.timezone   || '';
+      const lat    = data.lat ?? document.getElementById('lat').value;
+      const lon    = data.lon ?? document.getElementById('lon').value;
+      const units  = data.units || { temp: '°C', wind: 'km/h' };
+
+      const temp      = cur.temp      != null ? Math.round(cur.temp)       : '—';
+      const feelsLike = cur.feels_like != null ? Math.round(cur.feels_like) : '—';
+      const humidity  = cur.humidity  ?? '—';
+      const windSpeed = cur.wind_speed ?? '—';
+      const pressure  = cur.pressure  ?? '—';
+      const cond      = cur.condition || 'Clear';
+      const tu        = units.temp;
+      const wu        = units.wind;
+
+      let hourlyHtml = '';
+      if (hourly.length) {
+        const slice = hourly.slice(0, 12);
+        const temps = slice.map(h => h.temp ?? 0);
+        const minT  = Math.min(...temps), maxT = Math.max(...temps);
+        const range = (maxT - minT) || 1;
+
+        const bars = slice.map(h => {
+          const t   = Math.round(h.temp ?? 0);
+          const pct = 15 + ((t - minT) / range) * 80;
+          const lbl = (h.time || '').slice(11, 16);
+          return `<div class="hour-bar-wrap">
+            <span class="hour-temp">${t}${tu}</span>
+            <div class="hour-bar" style="height:${pct}%"></div>
+            <span class="hour-label">${lbl}</span>
+          </div>`;
+        }).join('');
+
+        hourlyHtml = `
+          <div class="forecast-card">
+            <div class="card-label">Chronological 12-Hour Path</div>
+            <div class="hourly-chart">${bars}</div>
+          </div>`;
+      }
+
+      const fcHtml = fc.map(day => {
+        const d = fmtDay(day.date);
+        return `<div class="forecast-day">
+          <div class="fd-name">${d.name}</div>
+          <div class="fd-date">${d.date}</div>
+          <div class="fd-icon">${icon(day.condition)}</div>
+          <div class="fd-high">${Math.round(day.temp_max ?? 0)}${tu}</div>
+          <div class="fd-low">${Math.round(day.temp_min ?? 0)}${tu}</div>
+          <div class="fd-cond">${day.condition || ''}</div>
+          ${day.precipitation != null ? `<div class="fd-rain">💧 ${day.precipitation}%</div>` : ''}
+        </div>`;
+      }).join('');
+
+      const aiHtml = ai ? `
+        <div class="ai-card">
+          <div class="ai-header">
+            <div class="ai-badge"><span class="ai-dot"></span>Analytical Overview & Synopsis</div>
+          </div>
+          <div class="ai-summary">“ ${ai} ”</div>
+        </div>` : '';
+
+      document.getElementById('content').innerHTML = `
+        <div class="hero-grid">
+          <div class="card">
+            <div class="card-label">Observed Reading Metrics</div>
+            <div class="temp-hero">
+              <div>
+                <div class="temp-big">${temp}<span class="temp-unit">${tu}</span></div>
+                <div class="condition-text">${cond}</div>
+                <div class="feels-like">Perceived index at ${feelsLike}${tu}</div>
+              </div>
+              <div class="weather-emoji">${icon(cond)}</div>
+            </div>
+            <div class="stats-grid">
+              <div class="stat"><div class="stat-label">Humidity</div><div class="stat-value">${humidity}%</div></div>
+              <div class="stat"><div class="stat-label">Wind Velocity</div><div class="stat-value">${windSpeed} ${wu}</div></div>
+              <div class="stat"><div class="stat-label">Barometric Pressure</div><div class="stat-value">${pressure != '—' ? pressure + ' hPa' : '—'}</div></div>
+              <div class="stat"><div class="stat-label">Registry Node</div><div class="stat-value">Open-Meteo</div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-label">Geographic Parameters</div>
+            <div class="location-name">Regional Profile</div>
+            <div class="location-meta">${parseFloat(lat).toFixed(4)}°N, ${parseFloat(lon).toFixed(4)}°E ${tz ? '· ' + tz : ''}</div>
+            <div class="stats-grid" style="margin-top:20px">
+              <div class="stat">
+                <div class="stat-label">Station Local Time</div>
+                <div class="stat-value">${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">Calculated Spans</div>
+                <div class="stat-value">${fc.length} Units</div>
+              </div>
+              ${fc[0]?.sunrise ? `<div class="stat"><div class="stat-label">Sunrise</div><div class="stat-value">${fc[0].sunrise.slice(11,16)}</div></div>` : ''}
+              ${fc[0]?.sunset  ? `<div class="stat"><div class="stat-label">Sunset</div><div class="stat-value">${fc[0].sunset.slice(11,16)}</div></div>`  : ''}
+            </div>
+          </div>
+        </div>
+
+        ${aiHtml}
+
+        ${hourlyHtml}
+
+        ${fc.length ? `
+        <div class="forecast-card">
+          <div class="card-label">Extended ${fc.length}-Day Ledger Forecast</div>
+          <div class="forecast-scroll">${fcHtml}</div>
+        </div>` : ''}`;
+
+      setLoading(false);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      checkHealth();
+      ['lat', 'lon'].forEach(id =>
+        document.getElementById(id).addEventListener('keydown', e => {
+          if (e.key === 'Enter') loadWeather();
+        })
+      );
+      loadWeather();
+    });
+  </script>
+</body>
+</html>
